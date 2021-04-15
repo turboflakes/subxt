@@ -50,6 +50,64 @@ pub struct ErasRewardPointsStore<T: Staking> {
     pub _phantom: PhantomData<T>,
 }
 
+/// Exposure of validator at era.
+///
+/// This is keyed first by the era index to allow bulk deletion and then the stash account.
+///
+/// Is it removed after `HISTORY_DEPTH` eras.
+/// If stakers hasn't been set or has been removed then empty exposure is returned.
+// #[derive(Clone, Encode, Decode, Debug, Store)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, Default, Store)]
+pub struct ErasStakersStore<T: Staking> {
+    #[store(returns = Exposure<T::AccountId, T::Balance>)]
+    /// Era index
+    pub index: EraIndex,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
+}
+
+/// Similar to `ErasStakers`, this holds the preferences of validators.
+///
+/// This is keyed first by the era index to allow bulk deletion and then the stash account.
+///
+/// Is it removed after `HISTORY_DEPTH` eras.
+// If prefs hasn't been set or has been removed then 0 commission is returned.
+#[derive(Clone, Encode, Decode, Debug, Store)]
+pub struct ErasValidatorPrefsStore<T: Staking> {
+    #[store(returns = ValidatorPrefs)]
+    /// Era index
+    pub index: EraIndex,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
+}
+
+/// The total validator era payout for the last `HISTORY_DEPTH` eras.
+///
+/// Eras that haven't finished yet or has been removed doesn't have reward.
+#[derive(Clone, Encode, Decode, Debug, Store)]
+pub struct ErasValidatorRewardStore<T: Staking> {
+    #[store(returns = Option<T::Balance>)]
+    /// Era index
+    pub index: EraIndex,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
+}
+
+/// The total amount staked for the last `HISTORY_DEPTH` eras.
+/// If total hasn't been set or has been removed then 0 stake is returned.
+#[derive(Clone, Encode, Decode, Debug, Store)]
+pub struct ErasTotalStakeStore<T: Staking> {
+    #[store(returns = T::Balance)]
+    /// Era index
+    pub index: EraIndex,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
+}
+
 /// Preference of what happens regarding validation.
 #[derive(Clone, Encode, Decode, Debug, Call)]
 pub struct SetPayeeCall<T: Staking> {
@@ -119,6 +177,17 @@ pub struct NominatorsStore<T: Staking> {
     #[store(returns = Option<Nominations<T::AccountId>>)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
+}
+
+/// The active era information, it holds index and start.
+///
+/// The active era is the era being currently rewarded. Validator set of this era must be equal 
+/// to [SessionInterface::validators].
+#[derive(Encode, Copy, Clone, Debug, Store)]
+pub struct ActiveEraStore<T: Staking> {
+    #[store(returns = ActiveEraInfo)]
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
 }
 
 /// The current era index.
