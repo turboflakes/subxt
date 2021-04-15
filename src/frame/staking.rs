@@ -279,6 +279,24 @@ pub struct BondCall<'a, T: Staking> {
     pub payee: RewardDestination<T::AccountId>,
 }
 
+/// A new set of stakers was elected.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct StakingElectionEvent<T: Staking> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+}
+
+/// The era payout has been set.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct EraPayoutEvent<T: Staking> {
+    /// Era index
+    pub era_index: EraIndex,
+    /// Total validator payout.
+    pub validator_payout: T::Balance,
+    /// Remainder from the maximum amount of reward.
+    pub remainder: T::Balance,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
