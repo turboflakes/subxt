@@ -279,11 +279,13 @@ pub struct BondCall<'a, T: Staking> {
     pub payee: RewardDestination<T::AccountId>,
 }
 
-/// A new set of stakers was elected.
+///  An account has bonded this amount.
 #[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
-pub struct StakingElectionEvent<T: Staking> {
-    /// Runtime marker.
-    pub _runtime: PhantomData<T>,
+pub struct BondedEvent<T: Staking> {
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
+    /// Amount bonded to the stash account.
+    pub amount: T::Balance,
 }
 
 /// The era payout has been set.
@@ -295,6 +297,13 @@ pub struct EraPayoutEvent<T: Staking> {
     pub validator_payout: T::Balance,
     /// Remainder from the maximum amount of reward.
     pub remainder: T::Balance,
+}
+
+/// A new set of stakers was elected.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct StakingElectionEvent<T: Staking> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
 }
 
 #[cfg(test)]
