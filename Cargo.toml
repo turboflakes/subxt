@@ -50,6 +50,7 @@ hex = "0.4.3"
 sp-std = "3.0.0"
 application-crypto = { version = "3.0.0", package = "sp-application-crypto" }
 pallet-staking = "3.0.0"
+pallet-identity = "3.0.0"
 
 sp-rpc = { version = "3.0.0", package = "sp-rpc" }
 sp-core = { version = "3.0.0", package = "sp-core" }

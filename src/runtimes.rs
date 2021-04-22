@@ -169,6 +169,10 @@ use crate::{
             System,
             SystemEventTypeRegistry,
         },
+        identity::{
+            Identity,
+            IdentityEventTypeRegistry,
+        },
     },
     EventTypeRegistry,
 };
@@ -206,6 +210,7 @@ impl Runtime for DefaultNodeRuntime {
         event_type_registry.with_staking();
         event_type_registry.with_contracts();
         event_type_registry.with_sudo();
+        event_type_registry.with_identity();
         register_default_type_sizes(event_type_registry);
     }
 }
@@ -234,6 +239,8 @@ impl Session for DefaultNodeRuntime {
 impl Contracts for DefaultNodeRuntime {}
 
 impl Sudo for DefaultNodeRuntime {}
+
+impl Identity for DefaultNodeRuntime {}
 
 /// Concrete type definitions compatible with the node template.
 ///
