@@ -58,6 +58,7 @@ mod error;
 mod events;
 pub mod extrinsic;
 mod metadata;
+pub use metadata::MetadataError;
 pub mod rpc;
 pub mod storage;
 mod subscription;
