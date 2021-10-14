@@ -112,6 +112,12 @@ impl ClientBuilder {
         if self.accept_weak_inclusion {
             rpc.accept_weak_inclusion();
         }
+        let (chain_name, node_name, node_version) = future::join3(
+            rpc.system_chain(), 
+            rpc.system_name(), 
+            rpc.system_version()
+        )
+        .await;
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
             rpc.metadata(),
             rpc.genesis_hash(),
@@ -132,6 +138,9 @@ impl ClientBuilder {
             runtime_version: runtime_version?,
             _marker: PhantomData,
             iter_page_size: self.page_size.unwrap_or(10),
+            chain_name: chain_name?,
+            node_name: node_name?,
+            node_version: node_version?,
         })
     }
 }
@@ -146,6 +155,9 @@ pub struct Client<T: Runtime> {
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     iter_page_size: u32,
+    chain_name: String,
+    node_name: String,
+    node_version: String,
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -159,6 +171,9 @@ impl<T: Runtime> Clone for Client<T> {
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
             iter_page_size: self.iter_page_size,
+            chain_name: self.chain_name.clone(),
+            node_name: self.node_name.clone(),
+            node_version: self.node_version.clone(),
         }
     }
 }
@@ -177,6 +192,21 @@ impl<T: Runtime> Client<T> {
     /// Returns the system properties
     pub fn properties(&self) -> &SystemProperties {
         &self.properties
+    }
+
+    /// Returns the system chain
+    pub fn chain_name(&self) -> &String {
+        &self.chain_name
+    }
+
+    /// Returns the system name
+    pub fn node_name(&self) -> &String {
+        &self.node_name
+    }
+
+    /// Returns the system version
+    pub fn node_version(&self) -> &String {
+        &self.node_version
     }
 
     /// Returns the rpc client.
