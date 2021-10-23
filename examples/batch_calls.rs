@@ -23,36 +23,52 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    ClientBuilder,
-    PairSigner,
-};
+use subxt::{ClientBuilder, PairSigner};
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
+
+type Call = polkadot::runtime_types::polkadot_runtime::Call;
+type BalancesCall = polkadot::runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
+    let alice = PairSigner::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id().into();
+    let charlie = AccountKeyring::Charlie.to_account_id().into();
 
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+
+    let calls = vec![
+        Call::Balances(BalancesCall::transfer {
+            dest: bob,
+            value: 10_000,
+        }),
+        Call::Balances(BalancesCall::transfer {
+            dest: charlie,
+            value: 5_000,
+        }),
+    ];
+
     let result = api
         .tx()
-        .balances()
-        .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
-        .await?;
+        .utility()
+        .batch(calls)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
 
-    if let Some(event) = result.find_event::<polkadot::balances::events::Transfer>()? {
-        println!("Balance transfer success: value: {:?}", event.2);
+    if let Some(event) =
+        result.find_event::<polkadot::utility::events::BatchCompleted>()?
+    {
+        println!("Batch success: value: {:?}", event);
     } else {
-        println!("Failed to find Balances::Transfer Event");
+        println!("Failed to find Utility::BatchCompleted Event");
     }
     Ok(())
 }
