@@ -58,11 +58,11 @@ enum Command {
         #[structopt(long, short, default_value = "json")]
         format: String,
     },
-    /// Generate runtime API code from metadata.
+    /// Generate runtime API client code from metadata.
     ///
     /// # Example (with code formatting)
     ///
-    /// `subxt-cli codegen | rustfmt --edition=2018 --emit=stdout`
+    /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
     Codegen {
         /// the url of the substrate node to query for metadata for codegen.
         #[structopt(name = "url", long, parse(try_from_str))]
