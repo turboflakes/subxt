@@ -311,6 +311,14 @@ where
                             _ => Err(EventsDecodingError::InvalidCompactType("Composite type must have a single field".into()).into())
                         }
                     }
+                    TypeDef::Compact(_compact) => {
+                        // [pm] NOTE: this needs some work, it is here so that decode ImOnline::SomeOffline with type_id = 45 -> Composite(TypeDefComposite { fields: [Field { name: Some("total"), ty: UntrackedSymbol { id: 46, marker: PhantomData }, type_name: Some("Balance"), docs: [] }, Field { name: Some("own"), ty: UntrackedSymbol { id: 46, marker: PhantomData }, type_name: Some("Balance"), docs: [] }, Field { name: Some("others"), ty: UntrackedSymbol { id: 47, marker: PhantomData }, type_name: Some("Vec<IndividualExposure<AccountId, Balance>>"), docs: [] }] })
+                        // does not fail for type_id = 46 -> Compact(TypeDefCompact { type_param: UntrackedSymbol { id: 6, marker: PhantomData } })
+                        // It seems that the TypeDefPrimitive::U128 is missing here! 
+                        // It should be redirect to here in metadata? -> PortableType {id: 6, ty: Type { path: Path { segments: [] }, type_params: [], type_def: Primitive(U128), docs: [] }
+                        // Temporary workaround is just enforce decoding...
+                        decode_raw::<Compact<u128>>(input, output)
+                    }
                     _ => Err(EventsDecodingError::InvalidCompactType("Compact type must be a primitive or a composite type".into()).into()),
                 }
             }
