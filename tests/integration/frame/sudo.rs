@@ -22,40 +22,14 @@ use crate::{
     },
     test_context,
 };
-use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
 use subxt::extrinsic::PairSigner;
 
-// todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::test]
-async fn test_sudo() {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().clone().into();
-    let cxt = test_context().await;
-
-    // todo: [AJ] allow encoded call to be constructed dynamically
-    let call = Call::Balances(BalancesCall::transfer {
-        dest: bob,
-        value: 10_000,
-    });
-
-    let res = cxt
-        .api
-        .tx()
-        .sudo()
-        .sudo(call)
-        .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-    let sudid = res.find_event::<sudo::events::Sudid>();
-    assert_matches!(sudid, Ok(Some(_)))
-}
-
-#[async_std::test]
-async fn test_sudo_unchecked_weight() {
+async fn test_sudo() -> Result<(), subxt::Error> {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
@@ -65,15 +39,43 @@ async fn test_sudo_unchecked_weight() {
         value: 10_000,
     });
 
-    let res = cxt
+    let found_event = cxt
+        .api
+        .tx()
+        .sudo()
+        .sudo(call)
+        .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized_success()
+        .await?
+        .has_event::<sudo::events::Sudid>()?;
+
+    assert!(found_event);
+    Ok(())
+}
+
+#[async_std::test]
+async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id().into();
+    let cxt = test_context().await;
+
+    let call = Call::Balances(BalancesCall::transfer {
+        dest: bob,
+        value: 10_000,
+    });
+
+    let found_event = cxt
         .api
         .tx()
         .sudo()
         .sudo_unchecked_weight(call, 0)
         .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
+        .await?
+        .wait_for_finalized_success()
+        .await?
+        .has_event::<sudo::events::Sudid>()?;
 
-    let sudid = res.find_event::<sudo::events::Sudid>();
-    assert_matches!(sudid, Ok(Some(_)))
+    assert!(found_event);
+    Ok(())
 }

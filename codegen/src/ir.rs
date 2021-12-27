@@ -21,11 +21,9 @@ use syn::{
     token,
 };
 
-// todo: [AJ] implement ToTokens for this to generate the actual mod
-// todo: [AJ] figure out how to incorporate the types and api codegen here...
 #[derive(Debug, PartialEq, Eq)]
 pub struct ItemMod {
-    // attrs: Vec<syn::Attribute>, // todo: [AJ] partition attributes between subxt and non-subxt
+    // attrs: Vec<syn::Attribute>,
     vis: syn::Visibility,
     mod_token: token::Mod,
     pub ident: syn::Ident,
@@ -74,7 +72,9 @@ impl ItemMod {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)]
 pub enum Item {
     Rust(syn::Item),
     Subxt(SubxtItem),
@@ -90,12 +90,9 @@ impl From<syn::Item> for Item {
                     let meta = attr.parse_meta().unwrap_or_else(|e| {
                         abort!(attr.span(), "Error parsing attribute: {}", e)
                     });
-                    let substitute_type_args =
-                        <attrs::Subxt as darling::FromMeta>::from_meta(&meta)
-                            .unwrap_or_else(|e| {
-                                abort!(attr.span(), "Error parsing attribute meta: {}", e)
-                            });
-                    substitute_type_args
+                    <attrs::Subxt as darling::FromMeta>::from_meta(&meta).unwrap_or_else(
+                        |e| abort!(attr.span(), "Error parsing attribute meta: {}", e),
+                    )
                 })
                 .collect::<Vec<_>>();
             if substitute_attrs.len() > 1 {
@@ -104,11 +101,11 @@ impl From<syn::Item> for Item {
                     "Duplicate `substitute_type` attributes"
                 )
             }
-            if let Some(attr) = substitute_attrs.iter().next() {
+            if let Some(attr) = substitute_attrs.get(0) {
                 let use_path = &use_.tree;
                 let substitute_with: syn::TypePath = syn::parse_quote!( #use_path );
                 let type_substitute = SubxtItem::TypeSubstitute {
-                    generated_type_path: attr.substitute_type().to_string(),
+                    generated_type_path: attr.substitute_type(),
                     substitute_with,
                 };
                 Self::Subxt(type_substitute)

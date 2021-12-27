@@ -139,7 +139,11 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                     } else {
                         self.composite_fields(v.fields(), &type_params, false)
                     };
-                    variants.push(quote! { #variant_name #fields });
+                    let index = proc_macro2::Literal::u8_unsuffixed(v.index());
+                    variants.push(quote! {
+                        #[codec(index = #index)]
+                        #variant_name #fields
+                    });
                     let unused_params_set = unused_type_params.iter().cloned().collect();
                     let used_params = type_params_set.difference(&unused_params_set);
 
@@ -201,7 +205,6 @@ impl<'a> TypeDefGen<'a> {
 
         let ty_toks = |ty_name: &str, ty_path: &TypePath| {
             if ty_name.contains("Box<") {
-                // todo [AJ] remove this hack once scale-info can represent Box somehow
                 quote! { ::std::boxed::Box<#ty_path> }
             } else {
                 quote! { #ty_path }
@@ -240,7 +243,6 @@ impl<'a> TypeDefGen<'a> {
                         }
                     };
                     if ty.is_compact() {
-                        // todo: [AJ] figure out way to ensure AsCompact generated for target type in scale_info.
                         quote!( #[codec(compact)] #field_type  )
                     } else {
                         quote!( #field_type  )
@@ -277,7 +279,7 @@ impl<'a> TypeDefGen<'a> {
             let mut fields_tokens = type_paths
                 .iter()
                 .map(|(ty, ty_name)| {
-                    match ty_name {
+                    let field_type = match ty_name {
                         Some(ty_name) => {
                             let ty = ty_toks(ty_name, ty);
                             if is_struct {
@@ -289,6 +291,11 @@ impl<'a> TypeDefGen<'a> {
                         None => {
                             quote! { #ty }
                         }
+                    };
+                    if ty.is_compact() {
+                        quote!( #[codec(compact)] #field_type  )
+                    } else {
+                        quote!( #field_type  )
                     }
                 })
                 .collect::<Vec<_>>();

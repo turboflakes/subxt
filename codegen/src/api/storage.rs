@@ -44,7 +44,7 @@ pub fn generate_storage(
     let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
         .entries
         .iter()
-        .map(|entry| generate_storage_entry_fns(&type_gen, &pallet, entry))
+        .map(|entry| generate_storage_entry_fns(type_gen, pallet, entry))
         .unzip();
 
     quote! {
@@ -205,7 +205,7 @@ fn generate_storage_entry_fns(
 
     let key_args = fields
         .iter()
-        .map(|(field_name, field_type)| quote!( #field_name: #field_type )); // todo: [AJ] borrow non build-inf types?
+        .map(|(field_name, field_type)| quote!( #field_name: #field_type ));
     let client_fns = quote! {
         pub async fn #fn_name(
             &self,

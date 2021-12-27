@@ -2,40 +2,67 @@
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
+### :warning: Health Warning :warning: considered *alpha* after recent changes, API still subject to change
+
+#### See https://github.com/paritytech/subxt/issues/309 for an overview of outstanding issues.
+
 ## Usage
 
-See [examples](./examples).
+### Downloading metadata from a Substrate node
+
+Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
+
+1. Install:
+```bash
+cargo install subxt-cli
+```
+2. Save the encoded metadata to a file:
+```bash
+subxt metadata -f bytes > metadata.scale
+```
+
+This defaults to querying the metadata of a locally running node on the default `http://localhost:9933/`. If querying
+a different node then the `metadata` command accepts a `--url` argument.
+
+### Generating the runtime API from the downloaded metadata
+
+Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
+target runtime:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "metadata.scale")]
+pub mod node_runtime { }
+```
+
+**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml` 
+resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)), *not* relative to the source file.
+
+### Initializing the API client
+
+API is still a work in progress. See [examples](./examples) for the current usage.
+
+### Querying Storage
+
+API is still a work in progress. See [tests](./tests/integration/frame) for the current usage.
+
+### Submitting Extrinsics
+
+API is still a work in progress. See [examples](./examples/polkadot_balance_transfer.rs) for the current usage.
 
 ## Integration Testing
 
 Most tests require a running substrate node to communicate with. This is done by spawning an instance of the
-substrate node per test. It requires an executable binary `substrate` at [`v3.0.0`](https://github.com/paritytech/substrate/releases/tag/v3.0.0) on your path.
+substrate node per test. It requires an executable binary `substrate` at [`polkadot-v0.9.10`](https://github.com/paritytech/substrate/releases/tag/polkadot-v0.9.10) on your path.
 
-This can be done by downloading the prebuilt binary:
-
-```bash
-curl "https://releases.parity.io/substrate/x86_64-debian:stretch/v3.0.0/substrate/substrate" --output substrate --location
-chmod +x ./substrate
-mv substrate ~/.local/bin
-```
-
-Or installed from source via cargo:
+This can be installed from source via cargo:
 
 ```bash
-cargo install --git https://github.com/paritytech/substrate node-cli --tag=v3.0.0 --force
+cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.10 --force
 ```
-
-
-
 
 **Alternatives**
 
 [substrate-api-client](https://github.com/scs/substrate-api-client) provides similar functionality.
-
-## Subxt Client
-By default the client builder will connect to a full node via rpc. The `subxt-client` helps
-embedding a light client directly. It can also be used to embed a full node. This is especially
-useful for testing and ci.
 
 #### License
 
