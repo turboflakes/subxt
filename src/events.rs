@@ -168,6 +168,8 @@ where
             .resolve_type(type_id)
             .ok_or(MetadataError::TypeNotFound(type_id))?;
 
+        log::debug!("[pm] Type: {:?}", ty);
+
         fn decode_raw<T: Codec>(
             input: &mut &[u8],
             output: &mut Vec<u8>,
@@ -281,6 +283,9 @@ where
                         }
                     }
                 };
+
+                log::debug!("[pm] (TypeDef::Compact) inner: {:?}", inner);
+                
                 match inner.type_def() {
                     TypeDef::Primitive(primitive) => decode_compact_primitive(primitive),
                     TypeDef::Composite(composite) => {
@@ -310,6 +315,13 @@ where
                                 .into())
                             }
                         }
+                    }
+                    TypeDef::Compact(_compact) => {
+                        // [pm] NOTE: This needs to be reviewed. 
+                        // This
+                        // Currently all events after ImOnline::SomeOffline are silently being ignored. 
+                        // Temporary workaround is just enforce decoding...
+                        decode_raw::<Compact<u128>>(input, output)
                     }
                     _ => {
                         Err(EventsDecodingError::InvalidCompactType(
