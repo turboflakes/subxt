@@ -144,17 +144,20 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                 Err(err) => return Some(Err(err)),
                 Ok(raw_events) => {
                     for (phase, raw) in raw_events {
-                        if let Some(ext_index) = self.extrinsic {
+                        log::debug!("*****_ok_0 _Events_y {:?}, {:?}", phase, raw);
+                        if let Some(ext_index) = self.extrinsic {   
                             if !matches!(phase, Phase::ApplyExtrinsic(i) if i as usize == ext_index)
                             {
                                 continue
                             }
                         }
+                        log::debug!("*****_ok_1 passed here {:?}", self.event);
                         if let Some((module, variant)) = self.event {
                             if raw.pallet != module || raw.variant != variant {
                                 continue
                             }
                         }
+                        log::debug!("*****_ok_2 passed here {:?}", self.event);
                         self.events.push_back(raw);
                     }
                 }
@@ -205,15 +208,35 @@ impl<T: Config> FinalizedEventStorageSubscription<T> {
             if let Some(storage_change) = self.storage_changes.pop_front() {
                 return Some(storage_change)
             }
-            let header: T::Header =
+            let _header: T::Header =
                 read_subscription_response("HeaderSubscription", &mut self.subscription)
                     .await?;
+            
+            // [pm] original
+            // self.storage_changes.extend(
+            //     self.rpc
+            //         .query_storage_at(&[self.storage_key.clone()], Some(header.unwrap().hash()))
+            //         .await
+            //         .ok()?,
+            // );
+            // [pm] change so we can look for events at a specific block *******************
+            // 
+            let block_number = 10819134;
+
+            let block_hash = self.rpc.block_hash(Some(block_number.into())).await.ok()?;
+
+            // Get header
+            let header = self.rpc.header(block_hash).await.ok()?;
+
             self.storage_changes.extend(
                 self.rpc
-                    .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
+                    .query_storage_at(&[self.storage_key.clone()], Some(header.unwrap().hash()))
                     .await
                     .ok()?,
             );
+
+            // [pm] *******************
+
         }
     }
 }
