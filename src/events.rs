@@ -318,8 +318,7 @@ where
                     }
                     TypeDef::Compact(_compact) => {
                         // [pm] NOTE: This needs to be reviewed. 
-                        // This
-                        // Currently all events after ImOnline::SomeOffline are silently being ignored. 
+                        // Currently all events after offences.Offence are silently being ignored. 
                         // Temporary workaround is just enforce decoding...
                         decode_raw::<Compact<u128>>(input, output)
                     }
