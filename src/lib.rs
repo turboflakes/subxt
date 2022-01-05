@@ -78,7 +78,7 @@ pub use crate::{
     config::{
         AccountData,
         Config,
-        ExtrinsicExtraData,
+        DefaultConfig,
     },
     error::{
         Error,
@@ -92,6 +92,7 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         PairSigner,
         SignedExtra,
         Signer,
@@ -165,7 +166,7 @@ impl codec::Encode for Encoded {
 }
 
 /// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),
