@@ -144,7 +144,7 @@ impl RuntimeError {
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
-            DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
+            // DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
             DispatchError::Arithmetic(_math_error) => {
                 Ok(Self::Other("math_error".into()))
             }
