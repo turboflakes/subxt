@@ -60,7 +60,7 @@ enum BlockReader<'a, T: Config> {
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, T::BlockNumber, Result<Vec<(Phase, RawEvent)>, Error>)>>),
+    Mock(Box<dyn Iterator<Item = (T::Hash, T::BlockNumber, Option<AuthorityIndex>, Result<Vec<(Phase, RawEvent)>, Error>)>>),
 }
 
 impl<'a, T: Config> BlockReader<'a, T> {
@@ -85,8 +85,8 @@ impl<'a, T: Config> BlockReader<'a, T> {
                 
                 Some((change_set.block, *header.number(), authority, flattened_events))
             }
-            // #[cfg(test)]
-            // BlockReader::Mock(it) => it.next(),
+            #[cfg(test)]
+            BlockReader::Mock(it) => it.next(),
         }
     }
 
@@ -338,6 +338,8 @@ mod tests {
                                 vec![
                                     (
                                         events[0].0,
+                                        1,
+                                        Some(1),
                                         Ok(events
                                             .iter()
                                             .take(half_len)
@@ -348,6 +350,8 @@ mod tests {
                                     ),
                                     (
                                         events[half_len].0,
+                                        1,
+                                        Some(1),
                                         Ok(events
                                             .iter()
                                             .skip(half_len)
@@ -378,7 +382,7 @@ mod tests {
 
                     for expected_event in expected_events {
                         assert_eq!(
-                            subscription.next().await.unwrap().unwrap(),
+                            subscription.next().await.unwrap().unwrap().2,
                             expected_event.2
                         );
                     }
