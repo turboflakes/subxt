@@ -47,6 +47,7 @@ pub use bitvec;
 pub use codec;
 pub use sp_core;
 pub use sp_runtime;
+pub use sp_consensus_babe;
 
 use codec::{
     Decode,
