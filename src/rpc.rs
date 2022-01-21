@@ -80,6 +80,10 @@ use crate::{
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
+    custom_subscription::{
+        CustomEventStorageSubscription,
+        CustomFinalizedEventStorageSubscription,
+    },
     Config,
     Metadata,
 };
@@ -520,6 +524,18 @@ impl<T: Config> Rpc<T> {
     ) -> Result<EventStorageSubscription<T>, Error> {
         Ok(EventStorageSubscription::Finalized(
             FinalizedEventStorageSubscription::new(
+                self.clone(),
+                self.subscribe_finalized_blocks().await?,
+            ),
+        ))
+    }
+
+    /// Subscribe to finalized events with block number and authority decoded.
+    pub async fn subscribe_finalized_events_with_block(
+        &self,
+    ) -> Result<CustomEventStorageSubscription<T>, Error> {
+        Ok(CustomEventStorageSubscription::Finalized(
+            CustomFinalizedEventStorageSubscription::new(
                 self.clone(),
                 self.subscribe_finalized_blocks().await?,
             ),

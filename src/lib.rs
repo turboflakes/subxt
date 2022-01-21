@@ -66,6 +66,7 @@ pub mod rpc;
 pub mod storage;
 mod subscription;
 mod transaction;
+mod custom_subscription;
 
 pub use crate::{
     client::{
@@ -117,6 +118,11 @@ pub use crate::{
         EventStorageSubscription,
         EventSubscription,
         FinalizedEventStorageSubscription,
+    },
+    custom_subscription::{
+        CustomEventStorageSubscription,
+        CustomEventSubscription,
+        CustomFinalizedEventStorageSubscription,
     },
     transaction::{
         TransactionEvents,
