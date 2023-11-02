@@ -1,6 +1,6 @@
 // subxt metadata --url wss://sys.turboflakes.io:443/bridgehub-kusama -f bytes > bridgehub_kusama_metadata.scale
-// subxt codegen --file asset_hub_statemine_metadata.scale | rustfmt --edition=2018 --emit=stdout > asset_hub_statemine_metadata.rs
-// cargo run --example count_blocks_to_fill_asset_hub_statemine
+// subxt codegen --file bridgehub_kusama_metadata.scale | rustfmt --edition=2018 --emit=stdout > bridgehub_kusama_metadata.rs
+// cargo run --example count_blocks_to_fill_bridge_hub_kusama
 
 use std::time::Instant;
 use subxt::{
@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api =
         OnlineClient::<PolkadotConfig>::from_url("wss://rpc.turboflakes.io/bridgehub-kusama").await?;
 
-    let start_block_number = find_start_block(api.clone(), 4808220).await?;
+    let start_block_number = find_start_block(api.clone(), 1127002).await?;
     let _last_block_number = find_desired_candidates_filled(api.clone(), start_block_number).await?;
     
     println!(
