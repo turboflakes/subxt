@@ -131,9 +131,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle"
-version = "1.0.6"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8901269c6307e8d93993578286ac0edf7f195079ffff5ebdeea6a59ffb7e36bc"
+checksum = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1"
 
 [[package]]
 name = "anstyle-parse"
@@ -327,7 +327,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artifacts"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.4"
+version = "4.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bc066a67923782aa8515dbaea16946c5bcc5addbd668bb80af688e53e548a0"
+checksum = "11d8838454fda655dafd3accb2b6e2bea645b9e4078abe84a22ceb947235c5cc"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -873,9 +873,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.2"
+version = "4.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae129e2e766ae0ec03484e609954119f123cc1fe650337e155d03b022f24f7b4"
+checksum = "216aec2b177652e3846684cbfe25c9964d18ec45234f0f5da5157b207ed1aab6"
 dependencies = [
  "anstream",
  "anstyle",
@@ -885,9 +885,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.4"
+version = "4.5.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "528131438037fd55894f62d6e9f068b8f45ac57ffa77517819645d10aed04f64"
+checksum = "501d359d5f3dcaf6ecdeee48833ae73ec6e42723a1e52419c79abf9507eec0a0"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -1812,7 +1812,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -2309,7 +2309,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -4745,7 +4745,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.36.1"
+version = "0.37.0"
 
 [[package]]
 name = "subtle"
@@ -4755,7 +4755,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -4798,9 +4798,9 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
- "clap 4.5.4",
+ "clap 4.5.15",
  "color-eyre",
  "frame-metadata 16.0.0",
  "heck 0.5.0",
@@ -4827,7 +4827,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -4847,7 +4847,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "base58",
@@ -4879,7 +4879,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -4904,7 +4904,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "darling 0.20.8",
  "parity-scale-codec",
@@ -4917,7 +4917,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "bitvec",
@@ -4931,7 +4931,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "bip32",
  "bip39",
@@ -4958,7 +4958,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "quote",
  "syn 2.0.60",
@@ -5021,7 +5021,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -5446,7 +5446,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
