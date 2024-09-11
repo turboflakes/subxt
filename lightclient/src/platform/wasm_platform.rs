@@ -124,11 +124,17 @@ impl PlatformRef for SubxtPlatform {
     }
 
     fn supports_connection_type(&self, connection_type: ConnectionType) -> bool {
+        // NOTE: Due to the warning 'this page is trying to load scripts from unauthenticated sources' on some browsers
+        // enforce only secure websocket connections (exception if remote is localhost)
         let result = matches!(
             connection_type,
             ConnectionType::WebSocketIpv4 { .. }
                 | ConnectionType::WebSocketIpv6 { .. }
-                | ConnectionType::WebSocketDns { .. }
+                | ConnectionType::WebSocketDns { remote_is_localhost: true, .. }
+                | ConnectionType::WebSocketDns { 
+                    secure: true, 
+                    remote_is_localhost: false 
+                }
         );
 
         tracing::trace!(
@@ -142,7 +148,6 @@ impl PlatformRef for SubxtPlatform {
 
     fn connect_stream(&self, multiaddr: Address) -> Self::StreamConnectFuture {
         tracing::trace!(target: LOG_TARGET, "Connect stream to multiaddr={:?}", multiaddr);
-
         // `PlatformRef` trait guarantees that `connect_stream` is only called with addresses
         // stated in `supports_connection_type`.
         let addr = match multiaddr {
@@ -165,14 +170,14 @@ impl PlatformRef for SubxtPlatform {
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr)
+                format!("wss://{}", addr)
             }
             Address::WebSocketIp {
                 ip: IpAddr::V6(ip),
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr)
+                format!("wss://{}", addr)
             }
 
             // The API user of the `PlatformRef` trait is never supposed to open connections of
