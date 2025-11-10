@@ -1,5 +1,6 @@
 #![allow(missing_docs)]
 
+use sp_core::crypto::{Ss58AddressFormat, Ss58Codec};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -44,7 +45,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Iterating over {} blocks",
         end_block_number - start_block_number
     );
-    let mut total_missing_rewards = 0_u128;
     let mut latest_block_number_processed: Option<u32> = Some(start_block_number);
     while let Some(block_number) = latest_block_number_processed {
         if block_number == end_block_number {
@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                                 / era_reward_points.total as u128;
                                             let validator_commission_reward = (total_reward
                                                 * commission as u128)
-                                                / 10_000_000_000_u128;
+                                                / 1_000_000_000_u128;
                                             let total_nominators_reward =
                                                 total_reward - validator_commission_reward;
 
@@ -104,7 +104,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                             let vor =
                                                 missing_rewards.entry(stash.clone()).or_default();
                                             *vor += validator_own_reward;
-                                            total_missing_rewards += validator_own_reward;
                                         }
                                     }
                                 }
@@ -133,28 +132,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut writer = BufWriter::new(file);
     writeln!(writer, "stash,reward,destination")?;
 
-    // Fetch reward destination account and export data as csv
+    // Fetch reward destination account, convert address formats to default Kusama address and export data as csv
+    let kusama = Ss58AddressFormat::custom(2);
     for (stash, reward) in &missing_rewards {
+        let stash_address = sp_core::crypto::AccountId32::new(stash.0);
         let query = runtime::storage().staking().payee(stash.clone());
         let result = api.storage().at_latest().await?.fetch(&query).await?;
         if let Some(payee) = result {
             match payee {
                 Payee::Account(destination) => {
+                    let destination_address = sp_core::crypto::AccountId32::new(destination.0);
                     writeln!(
                         writer,
                         "{},{},{}",
-                        stash.to_string(),
+                        stash_address.to_ss58check_with_version(kusama),
                         reward,
-                        destination.to_string()
+                        destination_address.to_ss58check_with_version(kusama)
                     )?;
                 }
                 _ => {
                     writeln!(
                         writer,
                         "{},{},{}",
-                        stash.to_string(),
+                        stash_address.to_ss58check_with_version(kusama),
                         reward,
-                        stash.to_string()
+                        stash_address.to_ss58check_with_version(kusama),
                     )?;
                 }
             }
@@ -164,7 +166,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!(
         "Calculated total self-stake rewards: {} KSM for {} validators ({:?})",
-        (total_missing_rewards as f64 / 1_000_000_000_000_f64),
+        (missing_rewards.values().sum::<u128>() as f64 / 1_000_000_000_000_f64),
         missing_rewards.len(),
         start.elapsed()
     );
