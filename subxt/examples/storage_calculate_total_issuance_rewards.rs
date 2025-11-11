@@ -1,23 +1,33 @@
 #![allow(missing_docs)]
 
+use codec::Encode;
 use sp_core::crypto::{Ss58AddressFormat, Ss58Codec};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use subxt::backend::{legacy::LegacyRpcMethods, rpc::RpcClient};
-use subxt::utils::AccountId32;
+use subxt::utils::{AccountId32, MultiAddress};
 use subxt::{OnlineClient, PolkadotConfig};
 use tokio::time::Instant;
 
 // Generate an interface that we can use from the node's metadata.
-#[subxt::subxt(runtime_metadata_path = "../artifacts/asset_hub_polkadot_metadata.scale")]
+#[subxt::subxt(
+    runtime_metadata_path = "../artifacts/asset_hub_polkadot_metadata.scale",
+    derive_for_all_types = "Clone, PartialEq, codec::Encode, codec::Decode"
+)]
 pub mod runtime {}
 
 use crate::runtime::runtime_types::bounded_collections::bounded_btree_map::BoundedBTreeMap;
 use crate::runtime::runtime_types::sp_arithmetic::per_things::Perbill;
 use crate::runtime::staking::storage::types::payee::Payee;
+use crate::runtime::utility::calls::types::with_weight::Weight;
+
+type Call = crate::runtime::runtime_types::asset_hub_polkadot_runtime::RuntimeCall;
+type UtilityCall = crate::runtime::runtime_types::pallet_utility::pallet::Call;
+type PreimageCall = crate::runtime::runtime_types::pallet_preimage::pallet::Call;
 
 const OUTPUT_FILENAME: &str = "total_issuance_rewards.csv";
+const CALLS_FILENAME: &str = "validated_batch_calls.csv";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,8 +49,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Start at block 10265699 where the first EraPaid event was emitted
     let start_block_number = 10265699_u32;
 
-    // End block could be the next block after the one containing the EraPaid event where runtime 2000002 is already enacted
-    let end_block_number = 10333743_u32;
+    // End block is one block after the block where runtime 2000002 is enacted
+    let end_block_number = 10344188_u32;
 
     // The old and new total issuance were collected from
     // https://github.com/polkadot-fellows/runtimes/pull/998/files#diff-02eb31199deb234b1df06a7173bf2f4694dbf9e34139e20063d89a5efd86246aR305
@@ -193,12 +203,161 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     writer.flush()?;
 
+    // Fetch block weights
+    let query = runtime::constants().system().block_weights();
+    let block_weights = api.constants().at(&query)?;
+
+    let max_extrinsic_weight = block_weights
+        .per_class
+        .normal
+        .max_extrinsic
+        .expect("Max extrinsic weights not found.");
+
+    let file = File::create(CALLS_FILENAME)?;
+    let mut writer = BufWriter::new(file);
+    writeln!(writer, "#,call_data")?;
+
+    // Create a treasury.spend_call for each missing reward
+    let mut calls_for_batch: Vec<Call> = build_calls_for_batch(&missing_rewards)?;
+
+    // 1. Add maximum of spend_calls in a single call of type utility.batch_all
+    // 2. Export the call_data to a csv file
+    let mut iteration = Some(1);
+    while let Some(x) = iteration {
+        let pending_calls =
+            validate_calls_for_batch(&api, &mut calls_for_batch, max_extrinsic_weight.clone())
+                .await?;
+
+        if calls_for_batch.len() > 0 {
+            let preimage_call = Call::Preimage(PreimageCall::note_preimage {
+                bytes: calls_for_batch.encode(),
+            });
+
+            let hex_call_data = to_hex(&preimage_call.encode());
+            writeln!(writer, "{}:{}", x, hex_call_data)?;
+        }
+
+        if let Some(next_calls) = pending_calls {
+            calls_for_batch = next_calls;
+            iteration = Some(x + 1);
+        } else {
+            iteration = None;
+        }
+    }
+    writer.flush()?;
+
     println!(
         "Calculated total missed rewards: {} DOT for {} accounts ({:?})",
         (missing_rewards.values().sum::<u128>() as f64 / 10_000_000_000_f64),
         missing_rewards.len(),
         start.elapsed()
     );
+
+    Ok(())
+}
+
+pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
+}
+
+fn build_calls_for_batch(
+    data: &BTreeMap<AccountId32, u128>,
+) -> Result<Vec<Call>, Box<dyn std::error::Error>> {
+    type TreasuryCall = crate::runtime::runtime_types::pallet_treasury::pallet::Call;
+
+    let mut calls_for_batch: Vec<Call> = vec![];
+
+    for (account, reward) in data.into_iter() {
+        let beneficiary: MultiAddress<AccountId32, ()> = MultiAddress::Id(account.clone());
+        let call = Call::Treasury(TreasuryCall::spend_local {
+            beneficiary,
+            amount: *reward,
+        });
+        calls_for_batch.push(call);
+    }
+    Ok(calls_for_batch)
+}
+
+pub async fn validate_calls_for_batch(
+    api: &OnlineClient<PolkadotConfig>,
+    calls: &mut Vec<Call>,
+    max_weight: Weight,
+) -> Result<Option<Vec<Call>>, Box<dyn std::error::Error>> {
+    let mut pending_calls = Vec::new();
+
+    loop {
+        let batch_call = Call::Utility(UtilityCall::batch_all {
+            calls: calls.clone(),
+        });
+
+        let preimage_call = Call::Preimage(PreimageCall::note_preimage {
+            bytes: batch_call.encode(),
+        });
+
+        match validate_call_via_tx_payment(&api, preimage_call.clone(), max_weight.clone()).await {
+            Ok(_) => {
+                if pending_calls.is_empty() {
+                    println!("Preimage validated with {} calls successfully", calls.len());
+                    return Ok(None);
+                } else {
+                    println!(
+                        "Preimage validated with {} calls successfully. Pending calls: {}",
+                        calls.len(),
+                        pending_calls.len()
+                    );
+                    return Ok(Some(pending_calls));
+                }
+            }
+            Err(err) => {
+                let err_str = err.to_string();
+                if err_str == "MaxWeightExceeded" {
+                    println!("Preimage with {} calls got weight exceeded", calls.len());
+                    // NOTE: If there's only one call left, we can't split it further.
+                    // This should never happen, as a single payout should always be able to fit
+                    // within the extrinsic weight limit.
+                    if calls.len() == 1 {
+                        return Err("MaxWeightExceededForOneExtrinsic".into());
+                    }
+
+                    // Remove half of the calls to speed up the process
+                    let mut split_point = calls.len() / 2;
+                    // Ensure split_point is even and try to fit one more if it's odd
+                    if split_point % 2 != 0 {
+                        split_point = if split_point > 1 { split_point + 1 } else { 1 };
+                    }
+                    let mut removed = calls.split_off(split_point);
+                    pending_calls.append(&mut removed);
+                } else {
+                    return Err(err);
+                }
+            }
+        }
+    }
+}
+
+async fn validate_call_via_tx_payment(
+    api: &OnlineClient<PolkadotConfig>,
+    call: Call,
+    max_weight: Weight,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let runtime_api_call = runtime::apis()
+        .transaction_payment_call_api()
+        .query_call_info(call, 0);
+
+    let result = api
+        .runtime_api()
+        .at_latest()
+        .await?
+        .call(runtime_api_call)
+        .await?;
+
+    println!("Call weight: {:?}, max_weight: {:?}", result, max_weight);
+
+    if result.weight.ref_time > max_weight.ref_time
+        || result.weight.proof_size > max_weight.proof_size
+    {
+        return Err("MaxWeightExceeded".into());
+    }
 
     Ok(())
 }
