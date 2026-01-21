@@ -4,6 +4,7 @@
 
 //! A Polkadot-JS account loader.
 
+use crate::sr25519;
 use base64::Engine;
 use crypto_secretbox::{
     Key, Nonce, XSalsa20Poly1305,
@@ -12,7 +13,6 @@ use crypto_secretbox::{
 use serde::Deserialize;
 use subxt_core::utils::AccountId32;
 use thiserror::Error as DeriveError;
-use crate::sr25519;
 
 /// Official Polkadot-JS allowed scrypt parameters
 /// https://github.com/polkadot-js/common/blob/fe0886be239526e6c559e98d1099815d4b4f4a7f/packages/util-crypto/src/scrypt/defaults.ts#L6
@@ -127,7 +127,10 @@ impl KeyringPairJson {
         // and if no match, bail out.
         //
         // Check if the combination exists in the allowed list
-        if !ALLOWED_PARAMS.iter().any(|&(a_n, a_p, a_r)| n == a_n && p == a_p && r == a_r) {
+        if !ALLOWED_PARAMS
+            .iter()
+            .any(|&(a_n, a_p, a_r)| n == a_n && p == a_p && r == a_r)
+        {
             return Err(Error::UnsupportedScryptParameters { n, p, r });
         }
 
@@ -135,9 +138,8 @@ impl KeyringPairJson {
         let log_n = (n as f64).log2() as u8;
 
         // Hash password.
-        let scrypt_params =
-            scrypt::Params::new(log_n, r, p, 32)
-                .map_err(|_| Error::UnsupportedScryptParameters { n, p, r })?;
+        let scrypt_params = scrypt::Params::new(log_n, r, p, 32)
+            .map_err(|_| Error::UnsupportedScryptParameters { n, p, r })?;
         let mut key = Key::default();
         scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key)
             .expect("Key should be 32 bytes.");
