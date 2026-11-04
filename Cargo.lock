@@ -532,7 +532,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "367c9c827ed431bff6868b7aa926e05b16eb46603cc8b6e768e4a5553fa1d155"
 dependencies = [
  "num-traits",
- "rand",
+ "rand 0.8.6",
 ]
 
 [[package]]
@@ -5177,9 +5177,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "4.0.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4720bc1498521cb1094a2a377bfccbbf384a996a4f3bb510a4098f5138b46cee"
+checksum = "b780906b3a7480f18c148366bf223d76258ce73c4a45685bc131fff24b1d7b1c"
 dependencies = [
  "ark-bls12-381 0.6.0",
  "ark-ec 0.6.0",
@@ -5230,6 +5230,7 @@ dependencies = [
  "slab",
  "smallvec",
  "soketto",
+ "strum 0.27.2",
  "twox-hash 2.1.0",
  "wasmi",
  "x25519-dalek",
@@ -5238,9 +5239,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "2.1.0"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "966af62409c5fca98e23cb5dcda4044fe2aa380f217c8dddc967dca468198c8f"
+checksum = "ea708747ec694c138492e4b244795b556be7e98f4f1eb683db8dd68b25cfac72"
 dependencies = [
  "async-channel",
  "async-lock",
