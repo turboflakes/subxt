@@ -10,7 +10,7 @@ on:
 jobs:
   tests:
     name: Build Substrate and Polkadot Binaries
-    runs-on: parity-large
+    runs-on: self-hosted
     steps:
       - name: checkout polkadot-sdk
         uses: actions/checkout@v6

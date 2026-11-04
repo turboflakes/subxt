@@ -76,7 +76,7 @@ jobs:
 
   clippy:
     name: Cargo clippy
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -131,7 +131,7 @@ jobs:
 
   check:
     name: Cargo check
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -271,7 +271,7 @@ jobs:
 
   docs:
     name: Check documentation and run doc tests
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [fmt, machete]
     timeout-minutes: 30
     steps:
@@ -299,7 +299,7 @@ jobs:
 
   basic_tests:
     name: Cargo test
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
     steps:
@@ -324,7 +324,7 @@ jobs:
 
   integration_tests:
     name: "Integration tests"
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
     strategy:
@@ -424,7 +424,7 @@ jobs:
 
   lightclient_integration_tests:
     name: "Lightclient integration tests (${{ matrix.feature }})"
-    runs-on: parity-large
+    runs-on: self-hosted
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 15
     strategy:
