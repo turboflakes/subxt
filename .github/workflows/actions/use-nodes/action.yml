@@ -11,6 +11,7 @@ runs:
       id: download-substrate-binary
       uses: dawidd6/action-download-artifact@4c1e823582f43b179e2cbb49c3eade4e41f992e2 # v10
       with:
+        repo: paritytech/subxt
         workflow: build-nodes.yml
         name: nightly-substrate-binary
 
@@ -18,6 +19,7 @@ runs:
       id: download-polkadot-binary
       uses: dawidd6/action-download-artifact@4c1e823582f43b179e2cbb49c3eade4e41f992e2 # v10
       with:
+        repo: paritytech/subxt
         workflow: build-nodes.yml
         name: nightly-polkadot-binary
 

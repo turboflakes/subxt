@@ -1,0 +1,24 @@
+{
+  "name": "Polkadot Asset Hub",
+  "id": "asset-hub-polkadot",
+  "chainType": "Live",
+  "bootNodes": [
+      "/dns/boot-polkadot-assethub.luckyfriday.io/tcp/443/wss/p2p/12D3KooWDR9M7CjV1xdjCRbRwkFn1E7sjMaL4oYxGyDWxuLrFc2J",
+      "/dns/boot-asset-hub-polkadot.stakeworld.io/tcp/443/wss/p2p/12D3KooWD8pxR4Ervm4tLsmsxNc82ouSQxaYWYWmVnrT5bYhAxQv",
+      "/ip4/193.39.195.54/udp/30315/webrtc-direct/certhash/uEiCVOFTWsewDS-4xYrLhcxQkBhv8xKJfwxr9iTAkDY1K5Q/p2p/12D3KooWL8CyLww3m3pRySQGGYGNJhWDMqko3j5xi67ckP7hDUvo",
+      "/ip4/193.39.195.54/udp/30318/webrtc-direct/certhash/uEiBGMhOJNVFhLZbU3q9842o3AtYmoXEgZvKzbidknfgCSQ/p2p/12D3KooWCGAaV7rrDTqyHu4ZzA8Z4WWfHAeRJodWnc5ViucB4NNt"
+  ],
+  "telemetryEndpoints": null,
+  "protocolId": null,
+  "properties": {
+    "ss58Format": 0,
+    "tokenDecimals": 10,
+    "tokenSymbol": "DOT"
+  },
+  "relay_chain": "polkadot",
+  "para_id": 1000,
+  "codeSubstitutes": {},
+  "genesis": {
+    "stateRootHash": "0xc1ef26b567de07159e4ecd415fbbb0340c56a09c4d72c82516d0f3bc2b782c80"
+  }
+}
