@@ -4,6 +4,10 @@
 
 //! Subxt macro for generating Substrate runtime interfaces.
 
+// `#[derive(FromMeta)]` from darling expands `#[darling(multiple)]` fields into
+// `field: field` initializers, which newer clippy versions flag as redundant.
+#![allow(clippy::redundant_field_names)]
+
 use codec::Decode;
 use darling::{FromMeta, ast::NestedMeta};
 use proc_macro::TokenStream;
