@@ -46,6 +46,11 @@ web = [
     "wasm-bindgen",
 ]
 
+# Exposes `ChainConfig::set_database_content()`, which relies on database content
+# exported via the unstable `chainHead_unstable_finalizedDatabase` smoldot JSON-RPC
+# method. The format of that content may change between smoldot versions.
+unstable-database = []
+
 [dependencies]
 futures = { workspace = true, features = ["async-await"] }
 serde = { workspace = true, features = ["derive"] }

@@ -18,6 +18,8 @@ pub enum ChainConfigError {
 pub struct ChainConfig<'a> {
     // The chain spec to use.
     chain_spec: Cow<'a, str>,
+    // Opaque database content previously exported from the light client.
+    database_content: Cow<'a, str>,
 }
 
 impl<'a> From<&'a str> for ChainConfig<'a> {
@@ -37,7 +39,16 @@ impl<'a> ChainConfig<'a> {
     pub fn chain_spec(chain_spec: impl Into<Cow<'a, str>>) -> Self {
         ChainConfig {
             chain_spec: chain_spec.into(),
+            database_content: Cow::Borrowed(""),
         }
+    }
+
+    /// Set the database content to the given value.
+    /// A previous persisted database can be exported via the `database_content` field.
+    #[cfg(feature = "unstable-database")]
+    pub fn set_database_content(mut self, database_content: impl Into<Cow<'a, str>>) -> Self {
+        self.database_content = database_content.into();
+        self
     }
 
     /// Set the bootnodes to the given ones.
@@ -61,7 +72,13 @@ impl<'a> ChainConfig<'a> {
 
         Ok(ChainConfig {
             chain_spec: Cow::Owned(chain_spec_json.to_string()),
+            database_content: self.database_content,
         })
+    }
+
+    // Used internally to fetch the database content back out.
+    pub(crate) fn as_database_content(&self) -> &str {
+        &self.database_content
     }
 
     // Used internally to fetch the chain spec back out.

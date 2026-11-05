@@ -24,7 +24,7 @@ default = ["jsonrpsee", "native"]
 
 # Features that we expect to be enabled for documentation.
 docs = [
-    "default", 
+    "default",
     "light-client",
     "runtime",
     "reconnecting-rpc-client",
@@ -77,6 +77,13 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 light-client = ["subxt-lightclient", "subxt-rpcs/light-client"]
+
+# Activate this to expose the Light Client unstable functionalities.
+# Note that this feature is experimental and things may break or not work as expected.
+unstable-light-client = [
+    "light-client",
+    "subxt-lightclient?/unstable-database",
+]
 
 # Activate this to expose the ability to generate metadata from Wasm runtime files.
 runtime-wasm-path = ["subxt-macro/runtime-wasm-path"]
@@ -154,6 +161,11 @@ http-body = { workspace = true }
 name = "light_client"
 path = "examples/light_client.rs"
 required-features = ["light-client", "jsonrpsee"]
+
+[[example]]
+name = "light_client_database"
+path = "examples/light_client_database.rs"
+required-features = ["light-client", "unstable-light-client", "jsonrpsee"]
 
 [[example]]
 name = "rpc_client"

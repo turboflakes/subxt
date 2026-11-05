@@ -105,7 +105,7 @@ impl LightClient {
                 max_pending_requests: u32::MAX.try_into().unwrap(),
                 max_subscriptions: u32::MAX,
             },
-            database_content: "",
+            database_content: chain_config.as_database_content(),
             potential_relay_chains: std::iter::empty(),
             user_data: (),
             statement_protocol_config: None,
@@ -158,7 +158,7 @@ impl LightClient {
                 max_pending_requests: u32::MAX.try_into().unwrap(),
                 max_subscriptions: u32::MAX,
             },
-            database_content: "",
+            database_content: chain_config.as_database_content(),
             potential_relay_chains: std::iter::once(self.relay_chain_id),
             user_data: (),
             statement_protocol_config: None,
@@ -231,6 +231,28 @@ impl LightClientRpc {
     ) -> Result<LightClientRpcSubscription, LightClientRpcError> {
         let (id, notifications) = self.handle.subscribe(method, params, unsub).await?;
         Ok(LightClientRpcSubscription { id, notifications })
+    }
+
+    /// Export the light client's database content for this chain. Save it and hand it to
+    /// [`ChainConfig::set_database_content()`] on a later start so that the light client
+    /// can resume from a recent finalized state instead of syncing from scratch.
+    /// `max_size_bytes` optionally limits the size of the returned string.
+    #[cfg(feature = "unstable-database")]
+    pub async fn database_content(
+        &self,
+        max_size_bytes: Option<u64>,
+    ) -> Result<String, LightClientRpcError> {
+        let params: Vec<u64> = max_size_bytes.into_iter().collect();
+        let params = serde_json::value::to_raw_value(&params)
+            .map_err(|e| LightClientRpcError::SmoldotError(e.to_string()))?;
+        let res = self
+            .request(
+                "chainHead_unstable_finalizedDatabase".to_string(),
+                Some(params),
+            )
+            .await?;
+        serde_json::from_str(res.get())
+            .map_err(|e| LightClientRpcError::SmoldotError(e.to_string()))
     }
 }
 
