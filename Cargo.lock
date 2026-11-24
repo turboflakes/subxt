@@ -741,12 +741,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "atomic-take"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8ab6b55fe97976e46f91ddbed8d147d966475dc29b2032757ba47e02376fbc3"
-
-[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1456,15 +1450,6 @@ name = "crossbeam-epoch"
 version = "0.9.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
-dependencies = [
- "crossbeam-utils",
-]
-
-[[package]]
-name = "crossbeam-queue"
-version = "0.3.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f58bbc28f91df819d0aa2a2c00cd19754769c2fad90579b3592b1c9ba7a3115"
 dependencies = [
  "crossbeam-utils",
 ]
@@ -4478,9 +4463,9 @@ dependencies = [
 
 [[package]]
 name = "ruzstd"
-version = "0.8.1"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3640bec8aad418d7d03c72ea2de10d5c646a598f9883c7babc160d91e3c1b26c"
+checksum = "69e4ce4a039f42bf25920b95667e4d789e98749ab11bbb8d2c2936f788421bb5"
 
 [[package]]
 name = "ryu"
@@ -5177,9 +5162,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "5.0.0"
+version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b780906b3a7480f18c148366bf223d76258ce73c4a45685bc131fff24b1d7b1c"
+checksum = "5132f7a54063e1ca8b5fa64c17f01e7add28c1c2b127dcd07c0abfe6eb9c531c"
 dependencies = [
  "ark-bls12-381 0.6.0",
  "ark-ec 0.6.0",
@@ -5187,26 +5172,19 @@ dependencies = [
  "ark-ff 0.6.0",
  "ark-serialize 0.6.0",
  "arrayvec 0.7.6",
- "async-lock",
- "atomic-take",
  "base32",
  "base64 0.22.1",
- "bip39",
  "blake2-rfc",
  "bs58",
  "chacha20",
- "crossbeam-queue",
  "derive_more 2.0.1",
  "ed25519-zebra",
  "either",
- "event-listener",
  "fastbloom",
  "fnv",
- "futures-lite",
  "futures-util",
  "hashbrown 0.16.1",
  "hex",
- "hmac 0.12.1",
  "itertools 0.14.0",
  "libm",
  "libsecp256k1",
@@ -5215,7 +5193,6 @@ dependencies = [
  "num-bigint",
  "num-rational",
  "num-traits",
- "pbkdf2",
  "pin-project",
  "poly1305",
  "rand 0.8.6",
@@ -5239,9 +5216,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "3.0.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea708747ec694c138492e4b244795b556be7e98f4f1eb683db8dd68b25cfac72"
+checksum = "318a7945d3557ed282195da6ffdff004d6d6bc0cf99ea541f9544210efebdd8c"
 dependencies = [
  "async-channel",
  "async-lock",
