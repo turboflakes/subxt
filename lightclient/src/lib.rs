@@ -30,6 +30,10 @@ use tokio::sync::mpsc;
 
 pub use chain_config::{ChainConfig, ChainConfigError};
 
+/// The maximum number of submitted transactions smoldot tracks at once. Further submissions
+/// are dropped until some finalize or are dropped. This is smoldot's own default for its wasm node.
+const MAX_PENDING_TRANSACTIONS: std::num::NonZero<u32> = std::num::NonZero::new(64).unwrap();
+
 /// Things that can go wrong when constructing the [`LightClient`].
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
@@ -109,6 +113,7 @@ impl LightClient {
             potential_relay_chains: std::iter::empty(),
             user_data: (),
             statement_protocol_config: None,
+            max_pending_transactions: MAX_PENDING_TRANSACTIONS,
         };
 
         let added_chain = client
@@ -162,6 +167,7 @@ impl LightClient {
             potential_relay_chains: std::iter::once(self.relay_chain_id),
             user_data: (),
             statement_protocol_config: None,
+            max_pending_transactions: MAX_PENDING_TRANSACTIONS,
         };
 
         let added_chain = self
